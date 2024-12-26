@@ -1,0 +1,332 @@
+
+
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blue's Text Editor</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Courier+New:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Arial:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Verdana:wght@400;700&display=swap');
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body.dark-mode {
+      background-color: #2c2c2c;
+      color: #f4f4f9;
+    }
+
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 700px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .container.dark-mode {
+      background-color: #444;
+      color: #fff;
+    }
+
+    h2 {
+      color: #007BFF;
+      margin-bottom: 20px;
+      font-size: 2em;
+    }
+
+    textarea {
+      width: 90%;
+      height: 200px;
+      border: 1px solid #007BFF;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 16px;
+      resize: both;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    textarea.dark-mode {
+      background-color: #333;
+      color: #f4f4f9;
+    }
+
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      min-width: 120px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+      transform: translateY(-2px);
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .extra-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    select, input[type="file"] {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 15px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    select option {
+      background-color: white;
+      color: black;
+    }
+
+    .counters {
+      margin-top: 15px;
+      font-size: 16px;
+      color: #555; /* Default color in light mode */
+      text-align: center;
+    }
+
+    body.dark-mode .counters {
+      color: #fff; /* White text color in dark mode */
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Modal styling */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none; /* Initially hidden */
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        max-width: 500px;
+      }
+      .extra-buttons button, select {
+        padding: 6px 10px;
+        font-size: 14px;
+        min-width: 90px;
+      }
+    }
+
+  </style>
+
+
+
+  <div class="container" id="editorContainer">
+    <h2>Blue's Text Editor</h2>
+    <div class="counters">
+      Word Count: <span id="wordCount">0</span> | Character Count: <span id="charCount">0</span>
+    </div>
+    <textarea id="textBox" placeholder="Enter your text here..." spellcheck="true"></textarea>
+
+    <div class="button-group">
+      <button onclick="undoText()">Undo</button>
+      <button onclick="redoText()">Redo</button>
+      <button onclick="discardText()">Discard</button>
+    </div>
+
+    <div class="button-group">
+      <button onclick="saveToFile()">Save as .txt</button>
+      <button onclick="document.getElementById('fileInput').click()">Open .txt</button>
+      <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+      <button onclick="openFindReplace()">Find &amp; Replace</button>
+    </div>
+
+    <div class="extra-buttons">
+      <button onclick="checkPlagiarism()">Check Plagiarism</button>
+      <button onclick="checkSpelling()">Check Spelling</button>
+      <select id="fontSelector" onchange="changeFont()">
+        <option value="Roboto">Roboto</option>
+        <option value="Open Sans">Open Sans</option>
+        <option value="Courier New">Courier New</option>
+        <option value="Arial">Arial</option>
+        <option value="Times New Roman">Times New Roman</option>
+        <option value="Verdana">Verdana</option>
+      </select>
+    </div>
+
+    <input type="file" id="fileInput" class="hidden" onchange="openFile()">
+  </div>
+
+  <!-- Find and Replace Modal -->
+  <div id="findReplaceModal" class="modal">
+    <div class="modal-content">
+      <h3>Find &amp; Replace</h3>
+      <label for="findText">Find:</label>
+      <input type="text" id="findText">
+      <label for="replaceText">Replace with:</label>
+      <input type="text" id="replaceText">
+      <button onclick="findAndReplace()">Replace</button>
+      <button onclick="closeFindReplaceModal()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    let undoStack = [];
+    let redoStack = [];
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const textBox = document.getElementById("textBox");
+
+      textBox.addEventListener("input", function() {
+        const text = textBox.value;
+        updateCounters(text);
+        undoStack.push(text);
+        if (undoStack.length > 10) undoStack.shift(); // Limit stack size to 10
+      });
+    });
+
+    function updateCounters(text) {
+      const wordCount = text.split(/\s+/).filter(Boolean).length;
+      const charCount = text.length;
+      document.getElementById("wordCount").textContent = wordCount;
+      document.getElementById("charCount").textContent = charCount;
+    }
+
+    function discardText() {
+      const textBox = document.getElementById("textBox");
+      textBox.value = "";
+      updateCounters("");
+    }
+
+    function undoText() {
+      if (undoStack.length > 1) {
+        redoStack.push(undoStack.pop());
+        const prevText = undoStack[undoStack.length - 1];
+        document.getElementById("textBox").value = prevText;
+        updateCounters(prevText);
+      }
+    }
+
+    function redoText() {
+      if (redoStack.length > 0) {
+        const nextText = redoStack.pop();
+        document.getElementById("textBox").value = nextText;
+        undoStack.push(nextText);
+        updateCounters(nextText);
+      }
+    }
+
+    function saveToFile() {
+      const text = document.getElementById("textBox").value;
+      const blob = new Blob([text], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'document.txt';
+      link.click();
+    }
+
+    function openFile() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        document.getElementById("textBox").value = e.target.result;
+        updateCounters(e.target.result);
+      };
+      
+      if (file) reader.readAsText(file);
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+      document.querySelector(".container").classList.toggle("dark-mode");
+    }
+
+    function openFindReplace() {
+      document.getElementById("findReplaceModal").style.display = "flex";
+    }
+
+    function closeFindReplaceModal() {
+      document.getElementById("findReplaceModal").style.display = "none";
+    }
+
+    function findAndReplace() {
+      const findText = document.getElementById("findText").value;
+      const replaceText = document.getElementById("replaceText").value;
+      const textBox = document.getElementById("textBox");
+      textBox.value = textBox.value.replace(new RegExp(findText, 'g'), replaceText);
+      updateCounters(textBox.value);
+      closeFindReplaceModal();
+    }
+
+    function changeFont() {
+      const selectedFont = document.getElementById('fontSelector').value;
+      const textBox = document.getElementById('textBox');
+      textBox.style.fontFamily = selectedFont;
+    }
+
+    // Placeholder function for plagiarism check
+    function checkPlagiarism() {
+      alert('Plagiarism check functionality coming soon! Integrate with an API like PlagiarismChecker.com');
+    }
+
+    // Placeholder function for spell check
+    function checkSpelling() {
+      alert('Spell check functionality coming soon! Integrate with an API like Grammarly or LanguageTool');
+    }
+  </script>
+
+
+
